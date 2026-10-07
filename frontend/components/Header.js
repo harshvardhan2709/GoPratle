@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function Header() {
   return (
     <header
@@ -11,48 +13,67 @@ export default function Header() {
         className="flex items-center justify-between h-14"
       >
         {/* Logo */}
-        <div className="flex items-center gap-3">
-          <div
-            style={{
-              width: "32px",
-              height: "32px",
-              borderRadius: "8px",
-              background: "var(--accent)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: "16px",
-              fontWeight: "700",
-              color: "#fff",
-            }}
-          >
-            G
+        <Link href="/dashboard" style={{ textDecoration: "none" }}>
+          <div className="flex items-center gap-3">
+            <div
+              style={{
+                width: "32px",
+                height: "32px",
+                borderRadius: "8px",
+                background: "var(--accent)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: "16px",
+                fontWeight: "700",
+                color: "#fff",
+              }}
+            >
+              G
+            </div>
+            <span
+              style={{
+                fontSize: "20px",
+                fontWeight: "700",
+                color: "var(--text-primary)",
+                letterSpacing: "-0.5px",
+              }}
+            >
+              GoPratle
+            </span>
           </div>
-          <span
+        </Link>
+
+        {/* Links */}
+        <div className="flex gap-4">
+          <Link
+            href="/dashboard"
             style={{
-              fontSize: "20px",
-              fontWeight: "700",
-              color: "var(--text-primary)",
-              letterSpacing: "-0.5px",
+              fontSize: "14px",
+              fontWeight: "500",
+              color: "var(--text-secondary)",
+              textDecoration: "none",
+              display: "flex",
+              alignItems: "center"
             }}
           >
-            GoPratle
-          </span>
-        </div>
-
-        {/* Badge */}
-        <div
-          style={{
-            fontSize: "13px",
-            fontWeight: "500",
-            color: "var(--text-secondary)",
-            background: "var(--bg-base)",
-            border: "1px solid var(--border)",
-            borderRadius: "6px",
-            padding: "4px 12px",
-          }}
-        >
-          Post a Requirement
+            Dashboard
+          </Link>
+          <Link
+            href="/"
+            style={{
+              fontSize: "13px",
+              fontWeight: "500",
+              color: "white",
+              background: "var(--accent)",
+              border: "1px solid var(--accent)",
+              borderRadius: "6px",
+              padding: "6px 14px",
+              textDecoration: "none",
+            }}
+          >
+            Post a Requirement
+          </Link>
         </div>
       </div>
     </header>

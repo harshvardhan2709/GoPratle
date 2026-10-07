@@ -96,6 +96,11 @@ const requirementSchema = new mongoose.Schema(
         message: 'Category must be one of: planner, performer, crew',
       },
     },
+    status: {
+      type: String,
+      enum: ['Open', 'In Progress', 'Completed', 'Cancelled'],
+      default: 'Open',
+    },
 
     // Category-specific details (only the relevant one will be populated)
     plannerDetails: { type: plannerDetailsSchema, default: null },

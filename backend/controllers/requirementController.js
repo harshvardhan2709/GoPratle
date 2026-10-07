@@ -149,7 +149,7 @@ const createRequirement = async (req, res, next) => {
 const getRequirements = async (req, res, next) => {
   try {
     const requirements = await Requirement.find()
-      .select('eventName eventType category location startDate endDate createdAt')
+      .select('eventName eventType category location startDate endDate createdAt status')
       .sort({ createdAt: -1 });
 
     res.status(200).json({
@@ -185,4 +185,135 @@ const getRequirementById = async (req, res, next) => {
   }
 };
 
-module.exports = { createRequirement, getRequirements, getRequirementById };
+// ── PUT /api/requirements/:id ─────────────────────────────────────────────────
+
+const updateRequirement = async (req, res, next) => {
+  try {
+    const requirement = await Requirement.findById(req.params.id);
+    if (!requirement) {
+      return next(createError('Requirement not found', 404));
+    }
+
+    const body = req.body;
+
+    // Validate category value if provided
+    if (body.category) {
+      const allowedCategories = ['planner', 'performer', 'crew'];
+      if (!allowedCategories.includes(body.category)) {
+        return next(createError('Category must be one of: planner, performer, crew'));
+      }
+    }
+
+    // Validate category-specific fields if category is provided or already exists
+    const categoryToValidate = body.category || requirement.category;
+    
+    // We construct a temporary merged object to validate against
+    // using the existing nested fields overlaid with new body fields
+    const mergedData = { ...body };
+    if (categoryToValidate === requirement.category) {
+       const existingDetails = requirement[`${categoryToValidate}Details`] || {};
+       Object.keys(existingDetails.toObject ? existingDetails.toObject() : existingDetails).forEach(k => {
+           if (mergedData[k] === undefined) mergedData[k] = existingDetails[k];
+       });
+    }
+
+    const categoryError = validateCategoryDetails(categoryToValidate, mergedData);
+    if (categoryError) return next(createError(categoryError));
+
+    // Validate status if provided
+    if (body.status) {
+        const allowedStatuses = ['Open', 'In Progress', 'Completed', 'Cancelled'];
+        if (!allowedStatuses.includes(body.status)) {
+            return next(createError('Invalid status'));
+        }
+    }
+
+    // Basic updates
+    if (body.eventName) requirement.eventName = body.eventName.trim();
+    if (body.eventType) requirement.eventType = body.eventType.trim();
+    if (body.startDate) requirement.startDate = new Date(body.startDate);
+    if (body.endDate) requirement.endDate = new Date(body.endDate);
+    if (body.location) requirement.location = body.location.trim();
+    if (body.venue !== undefined) requirement.venue = body.venue.trim();
+    if (body.status) requirement.status = body.status;
+
+    // If category changed, clear old details
+    if (body.category && body.category !== requirement.category) {
+        requirement.plannerDetails = null;
+        requirement.performerDetails = null;
+        requirement.crewDetails = null;
+        requirement.category = body.category;
+    }
+
+    // Update category-specific fields
+    const cat = requirement.category;
+    if (cat === 'planner') {
+      if (!requirement.plannerDetails) requirement.plannerDetails = {};
+      if (body.planningExperience !== undefined) requirement.plannerDetails.planningExperience = body.planningExperience;
+      if (body.eventScale !== undefined) requirement.plannerDetails.eventScale = body.eventScale;
+      if (body.servicesRequired !== undefined) requirement.plannerDetails.servicesRequired = body.servicesRequired;
+      if (body.budget !== undefined) requirement.plannerDetails.budget = body.budget;
+      if (body.numberOfEvents !== undefined) requirement.plannerDetails.numberOfEvents = Number(body.numberOfEvents);
+      if (body.specialRequirements !== undefined) requirement.plannerDetails.specialRequirements = body.specialRequirements;
+    } else if (cat === 'performer') {
+      if (!requirement.performerDetails) requirement.performerDetails = {};
+      if (body.performerType !== undefined) requirement.performerDetails.performerType = body.performerType;
+      if (body.genre !== undefined) requirement.performerDetails.genre = body.genre;
+      if (body.numberOfPerformers !== undefined) requirement.performerDetails.numberOfPerformers = Number(body.numberOfPerformers);
+      if (body.performanceDuration !== undefined) requirement.performerDetails.performanceDuration = body.performanceDuration;
+      if (body.budget !== undefined) requirement.performerDetails.budget = body.budget;
+      if (body.technicalRequirements !== undefined) requirement.performerDetails.technicalRequirements = body.technicalRequirements;
+      if (body.specialRequirements !== undefined) requirement.performerDetails.specialRequirements = body.specialRequirements;
+    } else if (cat === 'crew') {
+      if (!requirement.crewDetails) requirement.crewDetails = {};
+      if (body.crewRole !== undefined) requirement.crewDetails.crewRole = body.crewRole;
+      if (body.numberOfCrewMembers !== undefined) requirement.crewDetails.numberOfCrewMembers = Number(body.numberOfCrewMembers);
+      if (body.experienceLevel !== undefined) requirement.crewDetails.experienceLevel = body.experienceLevel;
+      if (body.budget !== undefined) requirement.crewDetails.budget = body.budget;
+      if (body.workingHours !== undefined) requirement.crewDetails.workingHours = body.workingHours;
+      if (body.requiredSkills !== undefined) requirement.crewDetails.requiredSkills = body.requiredSkills;
+      if (body.specialRequirements !== undefined) requirement.crewDetails.specialRequirements = body.specialRequirements;
+    }
+
+    await requirement.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Requirement updated successfully',
+      data: requirement,
+    });
+  } catch (err) {
+    if (err.name === 'CastError') {
+      return next(createError('Invalid requirement ID format', 400));
+    }
+    if (err.name === 'ValidationError') {
+      const messages = Object.values(err.errors).map((e) => e.message);
+      return next(createError(messages.join('; ')));
+    }
+    next(err);
+  }
+};
+
+// ── DELETE /api/requirements/:id ──────────────────────────────────────────────
+
+const deleteRequirement = async (req, res, next) => {
+  try {
+    const requirement = await Requirement.findByIdAndDelete(req.params.id);
+
+    if (!requirement) {
+      return next(createError('Requirement not found', 404));
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Requirement deleted successfully',
+    });
+  } catch (err) {
+    if (err.name === 'CastError') {
+      return next(createError('Invalid requirement ID format', 400));
+    }
+    next(err);
+  }
+};
+
+module.exports = { createRequirement, getRequirements, getRequirementById, updateRequirement, deleteRequirement };
