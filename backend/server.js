@@ -22,8 +22,14 @@ app.use(express.json());
 // HTTP request logger (dev format)
 app.use(morgan('dev'));
 
-// Allow requests from the Next.js frontend (any origin in dev)
-app.use(cors());
+// Configure CORS for production (allow specified FRONTEND_URL or default to localhost in dev)
+app.use(
+  cors({
+    origin: process.env.FRONTEND_URL || '*',
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    credentials: true,
+  })
+);
 
 // ── Routes ──────────────────────────────────────────────────────────────────
 

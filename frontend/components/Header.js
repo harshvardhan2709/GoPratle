@@ -8,7 +8,7 @@ export default function Header() {
     >
       <div
         style={{ maxWidth: "1100px", margin: "0 auto", padding: "0 24px" }}
-        className="flex items-center justify-between h-16"
+        className="flex items-center justify-between h-14"
       >
         {/* Logo */}
         <div className="flex items-center gap-3">

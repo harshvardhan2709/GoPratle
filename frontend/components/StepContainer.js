@@ -5,14 +5,14 @@ export default function StepContainer({ title, subtitle, children }) {
         background: "var(--bg-card)",
         border: "1px solid var(--border)",
         borderRadius: "var(--radius-lg)",
-        padding: "24px",
+        padding: "20px",
         boxShadow: "var(--shadow-card)",
-        marginBottom: "20px",
+        marginBottom: "16px",
       }}
     >
       {/* Step heading */}
       {(title || subtitle) && (
-        <div style={{ marginBottom: "16px" }}>
+        <div style={{ marginBottom: "12px" }}>
           {title && (
             <h2
               style={{

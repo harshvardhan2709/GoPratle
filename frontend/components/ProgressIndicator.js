@@ -7,7 +7,7 @@ const STEPS = [
 
 export default function ProgressIndicator({ currentStep }) {
   return (
-    <div className="w-full" style={{ marginBottom: "20px" }}>
+    <div className="w-full" style={{ marginBottom: "16px" }}>
       {/* Step row */}
       <div className="flex items-center justify-between" style={{ position: "relative" }}>
         {/* Connector line behind steps */}
