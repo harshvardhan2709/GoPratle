@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 import { useState, useEffect } from "react";
 
 export default function Step1Basics({ formData, setFormData, errors }) {

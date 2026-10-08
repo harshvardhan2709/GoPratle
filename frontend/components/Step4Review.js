@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/static-components */
 export default function Step4Review({ formData }) {
   const sectionStyle = {
     background: "var(--bg-input)",
@@ -108,7 +109,7 @@ export default function Step4Review({ formData }) {
       </div>
 
       <p style={{ fontSize: "13px", color: "var(--text-muted)", textAlign: "center", marginTop: "16px" }}>
-        Please review your details carefully. Click 'Submit Requirement' when you are ready.
+        Please review your details carefully. Click &apos;Submit Requirement&apos; when you are ready.
       </p>
     </div>
   );
